@@ -7,7 +7,7 @@ import subprocess
 from tempfile import NamedTemporaryFile
 
 # installed modules
-import elasticsearch
+from elasticsearch import Elasticsearch
 
 # project modules
 from config import *
@@ -59,7 +59,7 @@ def parse_raw_queries(raw_data):
     return queries
 
 
-def make_query_dsl(s):
+def make_query_dsl(s, simple=False):
     '''Return query in Elasticsearch DSL format
 
     Args:
@@ -69,21 +69,31 @@ def make_query_dsl(s):
         query (dict): query in Elasticsearch DSL format
     '''
 
-    query = {
-        'stored_fields': [],
-        'query': {
-            'match': {
-                'content': {
-                    'query': s,
-                    'operator': 'or'
+    if not simple: 
+        return {
+            'stored_fields': [],
+            'query': {
+                'match': {
+                    'content': {
+                        'query': s,
+                        'operator': 'or'
+                    }
                 }
             }
         }
-    }
-    return query
+
+    else:
+        return {
+            'stored_fields': [],
+            'query': {
+                'simple_query_string': {
+                    'query': s
+                }
+            }
+        }
 
 
-def search_queries(queries, index_name, es_host, es_port):
+def search_queries(queries, index_name, es):
     '''Search results for query in queries
 
     Args:
@@ -96,15 +106,11 @@ def search_queries(queries, index_name, es_host, es_port):
                 'narr': <query_narrative>
             }
         index_name (basestring): name of the index to add data to
-        es_host (basestring): Elasticsaearch host
-        es_port (int): Elasticsearch port
+        es: Elasticsearch connection instance
 
     Returns:
         results (dict): dictionary of query ids and relevant documents
     '''
-
-    es_client = elasticsearch.client.Elasticsearch(
-        'http://{}:{}'.format(es_host, es_port))
 
     results = {}
 
@@ -115,7 +121,7 @@ def search_queries(queries, index_name, es_host, es_port):
 
         # get the results in the raw form (i.e., as returned
         # by elasticsearch)
-        raw_results = es_client.search(
+        raw_results = es.search(
             index=index_name, body=query_dsl, size=1000)
 
         # extract the documents results and add
@@ -192,8 +198,11 @@ def main():
     with open(QUERIES_FP) as f:
         queries = parse_raw_queries(f.read())
 
+    # connection to Elasticsearch
+    es = Elasticsearch([ 'http://{}:{}'.format(ES_HOST, ES_PORT) ])
+
     # get results for query
-    results = search_queries(queries, INDEX_NAME, ES_HOST, ES_PORT)
+    results = search_queries(queries, INDEX_NAME, es)
 
     # run trec_eval
     output_treceval = run_treceval(results, QRELS_FP, TRECEVAL_FP)

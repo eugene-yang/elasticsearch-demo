@@ -6,7 +6,7 @@ INDEX_NAME = 'cosc488'
 INDEX_SETTINGS_FP = 'properties/index_settings.json'
 
 DATA_DIR = 'data/docs'
-QUERIES_FP = 'data/queries.txt'
+QUERIES_FP = 'data/queryfile.txt'
 QRELS_FP = 'data/qrels.txt'
 
 TRECEVAL_FP = 'bin/trec_eval'

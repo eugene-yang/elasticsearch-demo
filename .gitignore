@@ -67,3 +67,5 @@ target/
 
 # elasticsearch binaries
 elasticsearch-*
+
+data/*

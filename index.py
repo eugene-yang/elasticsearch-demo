@@ -6,7 +6,7 @@ import codecs
 from time import time
 
 # installed modules
-import elasticsearch
+from elasticsearch import Elasticsearch
 
 # project modules
 from config import *
@@ -56,51 +56,38 @@ def parse_raw_data(raw_data):
     return documents
 
 
-def index_parsed_data(documents, index_name, es_host, es_port):
+def index_parsed_data(documents, index_name, es):
     '''Index documents in the collection, one by one.
 
     Args:
         documents (dict): a <document_identifier, cleaned_document_text>
             dictionary
         index_name (basestring): name of the index to add data to
-        es_host (basestring): Elasticsaearch host
-        es_port (int): Elasticsearch port
+        es: Elasticserach connection instance
     '''
-
-    # obtain a client fo elasticsearch
-    es_client = elasticsearch.client.Elasticsearch(
-        'http://{}:{}'.format(es_host, es_port), timeout=120
-    )
 
     for doc_id, doc_content in documents.items():
         # the name 'content' for the content field and the doc_type are
         # specified in the mapping
-        es_client.create(
+        es.create(
             index=index_name, id=doc_id, doc_type='document',
             body={'content': doc_content}
         )
 
 
 def bulk_index_parsed_data(
-    documents, index_name, es_host, es_port, bulk_max_ops_cnt):
+    documents, index_name, es, bulk_max_ops_cnt=600):
     '''Index documents in the collection in bulk.
 
     Args:
         documents (dict): a <document_identifier, cleaned_document_text>
             dictionary
         index_name (basestring): name of the index to add data to
-        es_host (basestring): Elasticsaearch host
-        es_port (int): Elasticsearch port
+        es: Elasticsearch instance
         bulk_max_ops_cnt (int): maximum number of operations for bulk action
     '''
-    # obtain a client fo elasticsearch
-    es_client = elasticsearch.client.Elasticsearch(
-        'http://{}:{}'.format(es_host, es_port),
-        timeout=120
-    )
 
     # initialize an operations counter and an operations collector
-    cnt_ops = 0
     opts = []
 
     for doc_id, doc_content in documents.items():
@@ -108,40 +95,34 @@ def bulk_index_parsed_data(
         opts.append({'create':
             { '_index': index_name, '_type': 'document', '_id' : doc_id}})
         opts.append({'content': doc_content})
-        cnt_ops += 1
 
-        if cnt_ops == bulk_max_ops_cnt:
+        if len(opts) >= 2*bulk_max_ops_cnt:
             # do bulk operations
-            es_client.bulk(body=opts)
+            es.bulk(body=opts)
 
             # empty list and reset operations count
             del opts[:]
-            cnt_ops = 0
 
-    es_client.bulk(body=opts)
+    if len(opts) > 0:
+        es.bulk(body=opts)
 
 
-def create_index(index_name, index_settings, es_host, es_port):
+def create_index(index_name, index_settings, es):
     '''Create an index in the cluster
 
     Args:
         index_name (basestring): name of the index to add data to
         index_settings (dictionary): settings for the index that
             follow the Elasticsearch specs
-        es_host (basestring): Elasticsaearch host
-        es_port (int): Elasticsearch port
+        es: Elasticsearch connection instance
     '''
 
-    # obtain a client fo elasticsearch
-    es_client = elasticsearch.client.Elasticsearch(
-        'http://{}:{}'.format(es_host, es_port))
-
     # delete the previous index if it exists
-    if es_client.indices.exists(index=index_name):
-        es_client.indices.delete(index=index_name)
+    if es.indices.exists(index=index_name):
+        es.indices.delete(index=index_name)
 
     # create new index
-    es_client.indices.create(index=index_name, body=index_settings)
+    es.indices.create(index=index_name, body=index_settings)
 
 
 def main():
@@ -164,14 +145,17 @@ def main():
     end_time = time()
     print('pre-processing:   {:.3f} s'.format(end_time - start_time))
 
+    # connecting to elasticsearch
+    es = Elasticsearch([ 'http://{}:{}'.format(ES_HOST, ES_PORT) ])
+
     # we time the operations
     start_time = time()
 
     # create the index
-    create_index(INDEX_NAME, index_settings, ES_HOST, ES_PORT)
+    create_index(INDEX_NAME, index_settings, es)
 
     # index data one by one
-    index_parsed_data(documents, INDEX_NAME, ES_HOST, ES_PORT)
+    index_parsed_data(documents, INDEX_NAME, es)
 
     end_time = time()
     print('one-by-one index: {:.3f} s'.format(end_time - start_time))
