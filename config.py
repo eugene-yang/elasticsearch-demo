@@ -7,6 +7,6 @@ INDEX_SETTINGS_FP = 'properties/index_settings.json'
 
 DATA_DIR = 'data/docs'
 QUERIES_FP = 'data/queryfile.txt'
-QRELS_FP = 'data/qrels.txt'
+QRELS_FP = 'data/qrel.txt'
 
 TRECEVAL_FP = 'bin/trec_eval'

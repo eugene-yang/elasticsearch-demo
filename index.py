@@ -164,10 +164,10 @@ def main():
     start_time = time()
 
     # delete and recreate the index
-    create_index(INDEX_NAME, index_settings, ES_HOST, ES_PORT)
+    create_index(INDEX_NAME, index_settings, es)
     # index data in bulk
     bulk_index_parsed_data(
-        documents, INDEX_NAME, ES_HOST, ES_PORT, BULK_MAX_OPS_CNT)
+        documents, INDEX_NAME, es, BULK_MAX_OPS_CNT)
 
     end_time = time()
     print('bulk index: {:.3f} s'.format(end_time - start_time))

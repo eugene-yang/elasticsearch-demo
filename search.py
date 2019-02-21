@@ -45,12 +45,12 @@ def parse_raw_queries(raw_data):
 
         # get the description
         q_desc = re.search(
-            r'<desc> Description:\n([\w\W]+)<narr>', raw_query)\
+            r'<desc> Description:\W*\n([\w\W]+)<narr>', raw_query)\
                 .group(1).replace('\n', ' ').strip()
 
         # get the narrative
         q_narr = re.search(
-            r'<narr> Narrative:\n([\w\W]+)', raw_query)\
+            r'<narr> Narrative:\W*\n([\w\W]+)', raw_query)\
                 .group(1).replace('\n', ' ').replace('</top>', '').strip()
 
         queries.append(
