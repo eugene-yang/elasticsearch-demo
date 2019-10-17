@@ -1,6 +1,6 @@
 # Elasticsearch demo
 
-Demo for Elasticsearch `v.6.2.1` (might run on subsequent `6.x` releases, too; does not work on Elasticsearch `0.x`, `1.x`, `2.x`, and `5.x`).
+Demo for Elasticsearch `v.7.4.0` (might run on subsequent `6.x` releases with some modification to the setting json file; does not work on Elasticsearch `0.x`, `1.x`, `2.x`, and `5.x`).
 
 All documents and qrels are property of the [National Institute of Standards and Technology](http://www.nist.gov) and have been released from research purposes as part of [TREC](http://trec.nist.gov).
 
