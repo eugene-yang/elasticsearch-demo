@@ -70,7 +70,7 @@ def index_parsed_data(documents, index_name, es):
         # the name 'content' for the content field and the doc_type are
         # specified in the mapping
         es.create(
-            index=index_name, id=doc_id, doc_type='document',
+            index=index_name, id=doc_id,
             body={'content': doc_content}
         )
 
@@ -93,7 +93,7 @@ def bulk_index_parsed_data(
     for doc_id, doc_content in documents.items():
         # append appropriate operations
         opts.append({'create':
-            { '_index': index_name, '_type': 'document', '_id' : doc_id}})
+            { '_index': index_name, '_id' : doc_id}})
         opts.append({'content': doc_content})
 
         if len(opts) >= 2*bulk_max_ops_cnt:
@@ -149,16 +149,16 @@ def main():
     es = Elasticsearch([ 'http://{}:{}'.format(ES_HOST, ES_PORT) ])
 
     # we time the operations
-    start_time = time()
+    # start_time = time()
 
     # create the index
-    create_index(INDEX_NAME, index_settings, es)
+    # create_index(INDEX_NAME, index_settings, es)
 
     # index data one by one
-    index_parsed_data(documents, INDEX_NAME, es)
+    # index_parsed_data(documents, INDEX_NAME, es)
 
-    end_time = time()
-    print('one-by-one index: {:.3f} s'.format(end_time - start_time))
+    # end_time = time()
+    # print('one-by-one index: {:.3f} s'.format(end_time - start_time))
 
     # we time the operations
     start_time = time()
