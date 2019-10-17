@@ -149,16 +149,16 @@ def main():
     es = Elasticsearch([ 'http://{}:{}'.format(ES_HOST, ES_PORT) ])
 
     # we time the operations
-    # start_time = time()
+    start_time = time()
 
     # create the index
-    # create_index(INDEX_NAME, index_settings, es)
+    create_index(INDEX_NAME, index_settings, es)
 
     # index data one by one
-    # index_parsed_data(documents, INDEX_NAME, es)
+    index_parsed_data(documents, INDEX_NAME, es)
 
     # end_time = time()
-    # print('one-by-one index: {:.3f} s'.format(end_time - start_time))
+    print('one-by-one index: {:.3f} s'.format(end_time - start_time))
 
     # we time the operations
     start_time = time()
