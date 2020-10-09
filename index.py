@@ -4,6 +4,7 @@ import re
 import json
 import codecs
 from time import time
+from tqdm import tqdm
 
 # installed modules
 from elasticsearch import Elasticsearch
@@ -66,7 +67,7 @@ def index_parsed_data(documents, index_name, es):
         es: Elasticserach connection instance
     '''
 
-    for doc_id, doc_content in documents.items():
+    for doc_id, doc_content in tqdm(documents.items(), total=len(documents)):
         # the name 'content' for the content field and the doc_type are
         # specified in the mapping
         es.create(
@@ -90,7 +91,7 @@ def bulk_index_parsed_data(
     # initialize an operations counter and an operations collector
     opts = []
 
-    for doc_id, doc_content in documents.items():
+    for doc_id, doc_content in tqdm(documents.items(), total=len(documents)):
         # append appropriate operations
         opts.append({'create':
             { '_index': index_name, '_id' : doc_id}})
