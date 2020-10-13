@@ -158,7 +158,7 @@ def main():
     # index data one by one
     index_parsed_data(documents, INDEX_NAME, es)
 
-    # end_time = time()
+    end_time = time()
     print('one-by-one index: {:.3f} s'.format(end_time - start_time))
 
     # we time the operations
